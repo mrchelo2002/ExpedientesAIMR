@@ -1,0 +1,597 @@
+/*==============================================================*/
+/* DBMS name:      MySQL 5.0                                    */
+/* Created on:     09/12/2014 13:18:18                          */
+/*==============================================================*/
+
+
+alter table Area
+   drop primary key;
+
+drop table if exists Area;
+
+alter table Asociado
+   drop primary key;
+
+drop table if exists Asociado;
+
+alter table Association20
+   drop primary key;
+
+drop table if exists Association20;
+
+alter table Association3
+   drop primary key;
+
+drop table if exists Association3;
+
+alter table Contribuyente
+   drop primary key;
+
+drop table if exists Contribuyente;
+
+alter table Dependencia
+   drop primary key;
+
+drop table if exists Dependencia;
+
+drop table if exists EstadoExpediente;
+
+alter table Expediente
+   drop primary key;
+
+drop table if exists Expediente;
+
+alter table Expediente_asociado
+   drop primary key;
+
+drop table if exists Expediente_asociado;
+
+alter table FlujoExpediente
+   drop primary key;
+
+drop table if exists FlujoExpediente;
+
+alter table Glosado
+   drop primary key;
+
+drop table if exists Glosado;
+
+alter table HistorialExpediente
+   drop primary key;
+
+drop table if exists HistorialExpediente;
+
+alter table Localidad
+   drop primary key;
+
+drop table if exists Localidad;
+
+alter table Organismo
+   drop primary key;
+
+drop table if exists Organismo;
+
+drop table if exists Prioridad;
+
+alter table Repositorio
+   drop primary key;
+
+drop table if exists Repositorio;
+
+alter table Requisito
+   drop primary key;
+
+drop table if exists Requisito;
+
+drop table if exists RequisitoCumplido;
+
+drop table if exists TipoContribuyente;
+
+alter table TipoDocumento
+   drop primary key;
+
+drop table if exists TipoDocumento;
+
+alter table TipoExpediente
+   drop primary key;
+
+drop table if exists TipoExpediente;
+
+alter table TipoNota
+   drop primary key;
+
+drop table if exists TipoNota;
+
+drop table if exists TipoOrden;
+
+alter table Usuario
+   drop primary key;
+
+drop table if exists Usuario;
+
+/*==============================================================*/
+/* Table: Area                                                  */
+/*==============================================================*/
+create table Area
+(
+   IdArea               int not null,
+   NombreArea           varchar(254)
+);
+
+alter table Area comment 'Área de un organismo';
+
+alter table Area
+   add primary key (IdArea);
+
+/*==============================================================*/
+/* Table: Asociado                                              */
+/*==============================================================*/
+create table Asociado
+(
+   id_asociado          int not null
+);
+
+alter table Asociado comment 'Contiene los expedientes asociados';
+
+alter table Asociado
+   add primary key (id_asociado);
+
+/*==============================================================*/
+/* Table: Association20                                         */
+/*==============================================================*/
+create table Association20
+(
+   IdRequisito          int not null,
+   IdFlujo              int not null
+);
+
+alter table Association20
+   add primary key (IdRequisito, IdFlujo);
+
+/*==============================================================*/
+/* Table: Association3                                          */
+/*==============================================================*/
+create table Association3
+(
+   Usuario_ID           int not null,
+   ResponsableDependencia int not null comment '44444',
+   IdOrganismo          int not null,
+   IdDependencia        int not null,
+   Dep_ResponsableDependencia int not null comment '44444'
+);
+
+alter table Association3
+   add primary key (IdOrganismo, Usuario_ID, ResponsableDependencia, IdDependencia, Dep_ResponsableDependencia);
+
+/*==============================================================*/
+/* Table: Contribuyente                                         */
+/*==============================================================*/
+create table Contribuyente
+(
+   IdTipodoc            int,
+   IdLocalidad          int,
+   IdContribuyente      int not null,
+   NombreContribuyente  varchar(254),
+   DireccionContribuyente varchar(254),
+   DocumentoContribuyente varchar(254),
+   TelefonoContribuyente varchar(254),
+   EmailContribuyente   varchar(254),
+   tipo_contribuyente   int
+);
+
+alter table Contribuyente comment 'contiene el listado de contribuyentes iniciadores de expedie';
+
+alter table Contribuyente
+   add primary key (IdContribuyente);
+
+/*==============================================================*/
+/* Table: Dependencia                                           */
+/*==============================================================*/
+create table Dependencia
+(
+   IdOrganismo          int not null,
+   IdDependencia        int not null,
+   Sigla                varchar(254),
+   NombreDependencia    varchar(254),
+   UbicacionDependencia varchar(254),
+   TelefonoDependencia  varchar(254),
+   ResponsableDependencia int comment '44444'
+);
+
+alter table Dependencia comment 'Dependencia u oficina de un organismo';
+
+alter table Dependencia
+   add primary key (IdDependencia);
+
+/*==============================================================*/
+/* Table: EstadoExpediente                                      */
+/*==============================================================*/
+create table EstadoExpediente
+(
+   Iniciado             int comment 'estado en que se encuentra el expediente antes de ser enviado desde la mesa de entrada, cuando lo genera, hacia la dependencia destino',
+   PendienteDeAsignacion int comment 'cuando se encuentra en la bandeja de entrada general de la oficina a la que fue remitido',
+   Asignado             int comment 'cuando un usuario de la dependencia lo toma de la bandeja de entrada general y lo deposita en su bandeja de entrada personal',
+   Completado           int comment 'cuando el expediente se encuentra con todos los pasos completados y en mesa de entrada nuevamente',
+   Anulado              int comment 'cuando un expediente es eliminado por la mesa de entrada sin ser enviado a ningún lado',
+   Cancelado            int comment 'cuando el expediente es cancelado en alguna de las dependencias y remitido a mesa de entrada con la justificación debida',
+   Archivado            int comment 'cuando el expediente, ya completo y entregado al solicitante/iniciador, se archiva para no ser consultado en la inmediates y se deriva físicamente al arhivo municipal'
+);
+
+alter table EstadoExpediente comment 'contiene los diferentes estados del expediente';
+
+/*==============================================================*/
+/* Table: Expediente                                            */
+/*==============================================================*/
+create table Expediente
+(
+   IdExpediente         bigint not null,
+   IdGlosado            bigint,
+   IdCarpeta            int,
+   usuario_genero       int not null,
+   ResponsableDependencia int not null comment '44444',
+   IdBandeja            int comment 'se corresponde con el id_dependencia',
+   id_organismo_origen  int not null,
+   IdTipoExpediente     int,
+   id_dependencia_origen int,
+   id_dependencia_destino int,
+   IdContribuyente      int,
+   Identificador        varchar(254),
+   EsGlosado            bool comment 'indica que el expediente se encuentra glosado en otro expediente contenedor',
+   EsAsociado           bool comment 'indica que el expediente se encuentra asociado a otro expediente',
+   ContenedorGlosados   bool comment 'indica que el expediente es un expediente que contiene a otros expedientes glosados en sí mismo',
+   Caratula             varchar(254),
+   Motivo               varchar(254),
+   Observaciones        varchar(254),
+   FechaRecepcion       datetime,
+   Folios               int,
+   NumeroRecibo         int,
+   CodigoBarra          varchar(254),
+   CodigoBarraHumano    varchar(254),
+   id_organismo_destino int,
+   tipo_prioridad       int,
+   estado_expediente    int
+);
+
+alter table Expediente
+   add primary key (IdExpediente);
+
+/*==============================================================*/
+/* Table: Expediente_asociado                                   */
+/*==============================================================*/
+create table Expediente_asociado
+(
+   id_asociado          int not null,
+   IdExpediente         bigint not null
+);
+
+alter table Expediente_asociado
+   add primary key (id_asociado, IdExpediente);
+
+/*==============================================================*/
+/* Table: FlujoExpediente                                       */
+/*==============================================================*/
+create table FlujoExpediente
+(
+   IdFlujo              int not null,
+   IdTipoExpediente     int,
+   IdDependencia        int,
+   NumeroSecuencia      int
+);
+
+alter table FlujoExpediente
+   add primary key (IdFlujo);
+
+/*==============================================================*/
+/* Table: Glosado                                               */
+/*==============================================================*/
+create table Glosado
+(
+   IdGlosado            bigint not null
+);
+
+alter table Glosado
+   add primary key (IdGlosado);
+
+/*==============================================================*/
+/* Table: HistorialExpediente                                   */
+/*==============================================================*/
+create table HistorialExpediente
+(
+   IdHistorico          bigint not null,
+   IdExpediente         bigint,
+   Usuario_origen       int,
+   Usu_ResponsableDependencia int comment '44444',
+   ResponsableDependencia int comment '44444',
+   IdDependencia        int,
+   Dep_IdDependencia    int,
+   FechaMovimiento      datetime,
+   CantidadFolios       int,
+   Observaciones        varchar(254)
+);
+
+alter table HistorialExpediente comment 'historial de pases de los expedientes';
+
+alter table HistorialExpediente
+   add primary key (IdHistorico);
+
+/*==============================================================*/
+/* Table: Localidad                                             */
+/*==============================================================*/
+create table Localidad
+(
+   IdLocalidad          int not null,
+   NombreLocalidad      varchar(254),
+   ProvinciaLocalidad   varchar(254),
+   CodigoPostal         varchar(254),
+   PaisLocalidad        varchar(254)
+);
+
+alter table Localidad comment 'contiene las localidades';
+
+alter table Localidad
+   add primary key (IdLocalidad);
+
+/*==============================================================*/
+/* Table: Organismo                                             */
+/*==============================================================*/
+create table Organismo
+(
+   IdOrganismo          int not null,
+   IdArea               int,
+   Sigla                varchar(254),
+   NombreOrganismo      varchar(254),
+   DireccionOrganismo   varchar(254),
+   TelefonoOrganismo    varchar(254),
+   EmailOrganismo       varchar(254)
+);
+
+alter table Organismo
+   add primary key (IdOrganismo);
+
+/*==============================================================*/
+/* Table: Prioridad                                             */
+/*==============================================================*/
+create table Prioridad
+(
+   PrioridadNormal      int,
+   PrioridadBaja        int,
+   PrioridadUrgente     int
+);
+
+alter table Prioridad comment 'Establece el estado de prioridad del expediente';
+
+/*==============================================================*/
+/* Table: Repositorio                                           */
+/*==============================================================*/
+create table Repositorio
+(
+   IdElemento           int not null,
+   IdTipoNota           int,
+   IdExpediente         bigint,
+   NombreArchivo        varchar(254),
+   UbicacionArchivo     varchar(254),
+   Observaciones        varchar(254)
+);
+
+alter table Repositorio comment 'contiene los links a los documentos asociados a cada expedie';
+
+alter table Repositorio
+   add primary key (IdElemento);
+
+/*==============================================================*/
+/* Table: Requisito                                             */
+/*==============================================================*/
+create table Requisito
+(
+   IdRequisito          int not null,
+   NombreRequisito      varchar(254)
+);
+
+alter table Requisito
+   add primary key (IdRequisito);
+
+/*==============================================================*/
+/* Table: RequisitoCumplido                                     */
+/*==============================================================*/
+create table RequisitoCumplido
+(
+   IdRequisito          int not null,
+   IdFlujo              int not null,
+   IdExpediente         bigint not null,
+   IdRequisitoCumplido  int,
+   Cumplio              bool
+);
+
+/*==============================================================*/
+/* Table: TipoContribuyente                                     */
+/*==============================================================*/
+create table TipoContribuyente
+(
+   PersonaFisica        int,
+   PersonaJuridica      int,
+   Dependencia          int
+);
+
+/*==============================================================*/
+/* Table: TipoDocumento                                         */
+/*==============================================================*/
+create table TipoDocumento
+(
+   IdTipodoc            int not null,
+   NombreTipodoc        varchar(254)
+);
+
+alter table TipoDocumento comment 'los tipos de documentos';
+
+alter table TipoDocumento
+   add primary key (IdTipodoc);
+
+/*==============================================================*/
+/* Table: TipoExpediente                                        */
+/*==============================================================*/
+create table TipoExpediente
+(
+   IdTipoExpediente     int not null,
+   NombreTipoExpediente varchar(254),
+   TipoTieneFlujo       bool comment 'si es verdadero, el tipo de expediente tiene un flujo asociado',
+   RequiereActuadm      bool comment 'indica si se requiere el cobro de una actuación administrativa para el procesamiento del expediente'
+);
+
+alter table TipoExpediente
+   add primary key (IdTipoExpediente);
+
+/*==============================================================*/
+/* Table: TipoNota                                              */
+/*==============================================================*/
+create table TipoNota
+(
+   IdTipoNota           int not null,
+   NombreTipoNota       varchar(254)
+);
+
+alter table TipoNota
+   add primary key (IdTipoNota);
+
+/*==============================================================*/
+/* Table: TipoOrden                                             */
+/*==============================================================*/
+create table TipoOrden
+(
+   PorId                int,
+   PorFecha             int,
+   PorOrganismo         int,
+   PorDependencia       int,
+   PorTipoExpediente    int,
+   PorEstado            int,
+   PorPrioridad         int
+);
+
+alter table TipoOrden comment 'tipo de orden';
+
+/*==============================================================*/
+/* Table: Usuario                                               */
+/*==============================================================*/
+create table Usuario
+(
+   Usuario_ID           int auto_increment,
+   ResponsableDependencia int not null comment '44444',
+   NombreUsuario        varchar(254),
+   EmailUsuario         varchar(254),
+   NombreCompletoUsuario varchar(254),
+   Password             varchar(254)
+);
+
+alter table Usuario
+   add primary key (Usuario_ID, ResponsableDependencia);
+
+alter table Association20 add constraint FK_Requisito foreign key (IdFlujo)
+      references FlujoExpediente (IdFlujo) on delete restrict on update restrict;
+
+alter table Association20 add constraint FK_pertenece foreign key (IdRequisito)
+      references Requisito (IdRequisito) on delete restrict on update restrict;
+
+alter table Association3 add constraint FK_Dependencias foreign key (Usuario_ID, ResponsableDependencia)
+      references Usuario (Usuario_ID, ResponsableDependencia) on delete restrict on update restrict;
+
+alter table Association3 add constraint FK_usuario foreign key (IdDependencia)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table Contribuyente add constraint FK_Association13 foreign key (IdLocalidad)
+      references Localidad (IdLocalidad) on delete restrict on update restrict;
+
+alter table Contribuyente add constraint FK_Association15 foreign key (IdTipodoc)
+      references TipoDocumento (IdTipodoc) on delete restrict on update restrict;
+
+alter table Contribuyente add constraint FK_Association4 foreign key (tipo_contribuyente)
+      references TipoContribuyente (PersonaFisica) on delete restrict on update restrict;
+
+alter table Dependencia add constraint FK_OrganismoDependencia foreign key (IdOrganismo)
+      references Organismo (IdOrganismo) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association10 foreign key (estado_expediente)
+      references EstadoExpediente (Completado) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association24 foreign key (id_organismo_origen)
+      references Organismo (IdOrganismo) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association25 foreign key (id_dependencia_origen)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association26 foreign key (id_dependencia_destino)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association27 foreign key (IdContribuyente)
+      references Contribuyente (IdContribuyente) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association28 foreign key (usuario_genero, ResponsableDependencia)
+      references Usuario (Usuario_ID, ResponsableDependencia) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association30 foreign key (IdGlosado)
+      references Glosado (IdGlosado) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association4 foreign key (IdBandeja)
+      references BandejaGeneral (IdBandeja) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association5 foreign key (IdCarpeta)
+      references Carpeta (IdCarpeta) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association6 foreign key (IdTipoExpediente)
+      references TipoExpediente (IdTipoExpediente) on delete restrict on update restrict;
+
+alter table Expediente add constraint FK_Association9 foreign key (tipo_prioridad)
+      references Prioridad (PrioridadBaja) on delete restrict on update restrict;
+
+alter table Expediente_asociado add constraint FK_asociado foreign key (IdExpediente)
+      references Expediente (IdExpediente) on delete restrict on update restrict;
+
+alter table Expediente_asociado add constraint FK_expediente foreign key (id_asociado)
+      references Asociado (id_asociado) on delete restrict on update restrict;
+
+alter table FlujoExpediente add constraint FK_Association7 foreign key (IdTipoExpediente)
+      references TipoExpediente (IdTipoExpediente) on delete restrict on update restrict;
+
+alter table FlujoExpediente add constraint FK_Association8 foreign key (IdDependencia)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table HistorialExpediente add constraint FK_Association16 foreign key (IdExpediente)
+      references Expediente (IdExpediente) on delete restrict on update restrict;
+
+alter table HistorialExpediente add constraint FK_Association17 foreign key (IdDependencia)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table HistorialExpediente add constraint FK_Association18 foreign key (Usuario_origen, ResponsableDependencia)
+      references Usuario (Usuario_ID, ResponsableDependencia) on delete restrict on update restrict;
+
+alter table HistorialExpediente add constraint FK_Association19 foreign key (Dep_IdDependencia)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table HistorialExpediente add constraint FK_Association29 foreign key (Usuario_origen, Usu_ResponsableDependencia)
+      references Usuario (Usuario_ID, ResponsableDependencia) on delete restrict on update restrict;
+
+alter table Organismo add constraint FK_AreaOrganismo foreign key (IdArea)
+      references Area (IdArea) on delete restrict on update restrict;
+
+alter table Repositorio add constraint FK_Association11 foreign key (IdTipoNota)
+      references TipoNota (IdTipoNota) on delete restrict on update restrict;
+
+alter table Repositorio add constraint FK_Association12 foreign key (IdExpediente)
+      references Expediente (IdExpediente) on delete restrict on update restrict;
+
+alter table RequisitoCumplido add constraint FK_Association21 foreign key (IdRequisito)
+      references Requisito (IdRequisito) on delete restrict on update restrict;
+
+alter table RequisitoCumplido add constraint FK_Association22 foreign key (IdExpediente)
+      references Expediente (IdExpediente) on delete restrict on update restrict;
+
+alter table RequisitoCumplido add constraint FK_Association23 foreign key (IdFlujo)
+      references FlujoExpediente (IdFlujo) on delete restrict on update restrict;
+
+alter table Seguimiento add constraint FK_Association10 foreign key (IdExpediente)
+      references Expediente (IdExpediente) on delete restrict on update restrict;
+
+alter table Usuario add constraint FK_Relationship_1 foreign key (Usuario_ID)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
+alter table Usuario add constraint FK_Relationship_1 foreign key (Usuario_ID)
+      references Dependencia (IdDependencia) on delete restrict on update restrict;
+
